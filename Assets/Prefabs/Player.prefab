@@ -538,7 +538,7 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: a464e659-f1c1-4584-a512-ba25f1f7bdb9
     m_ActionName: UI/TrackedDeviceOrientation
-  m_NeverAutoSwitchControlSchemes: 1
+  m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: PlayerControl
   m_SplitScreenIndex: -1
@@ -708,6 +708,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 6032116204643448769, guid: a43ff2c0f8532e743b9beed8f362d257, type: 3}
   fireRate: 600
+  shotgunFireRate: 120
   fireEnabled: 1
   shotgun: 0
   shotgunBullets: 6

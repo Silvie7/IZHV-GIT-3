@@ -22,7 +22,8 @@ public class Gun : MonoBehaviour
     /// </summary>
     [ Header("Gameplay") ]
     public float fireRate = 60.0f;
-    
+    public float shotgunFireRate = 120.0f;
+
     /// <summary>
     /// Can this gun fire?
     /// </summary>
@@ -83,9 +84,11 @@ public class Gun : MonoBehaviour
     /// </summary>
     private Entity mBulletEntityPrefab;
 
+
     /// <summary>
     /// Called when the script instance is first loaded.
     /// </summary>
+    /// 
     private void Awake()
     { mBulletDirector = transform; }
 
@@ -133,8 +136,14 @@ public class Gun : MonoBehaviour
         
         if (mFiring && fireEnabled)
         {
+            var secondsPerBullet = 0f;
             // Number of seconds we should wait between bullet spawns.
-            var secondsPerBullet = 1.0f / (fireRate / 60.0f);
+            if (!shotgun) {
+                secondsPerBullet = 1.0f / (fireRate / 60.0f);
+            }
+            if (shotgun) {
+                secondsPerBullet = 1.0f / (shotgunFireRate / 60.0f);
+            }
 
             while (mCoolDown <= 0.0f)
             { // Spawn corresponding number of bullets.
@@ -200,28 +209,42 @@ public class Gun : MonoBehaviour
          *  - Number / spread of shotgun bullets : shotgunBullets, shotgunSpread
          * Implement both single shot and shotgun (swap by pressing <SPACE> by default)
          */
-        
-        SpawnBullet(
-            new Vector3{ x = 0.0f, y = 0.0f, z = 0.0f }, 
-            Quaternion.Euler(0.0f, 0.0f, 0.0f)
-        );
+
+        if (!shotgun)
+        {
+            SpawnBullet(
+                //new Vector3{ x = 0.0f, y = 0.0f, z = 0.0f }
+                transform.position
+                ,
+                //Quaternion.Euler(0.0f, 0.0f, 0.0f)
+                transform.parent.transform.rotation
+                );
+        }
+        if (shotgun)
+        {
+            SpawnBullet(transform.position, transform.parent.transform.rotation);
+            SpawnBullet(transform.position, transform.parent.transform.rotation * Quaternion.Euler(0,0,shotgunSpread));
+            SpawnBullet(transform.position, transform.parent.transform.rotation * Quaternion.Euler(0, 0, -shotgunSpread));
+        }
+    
     }
 
     /// <summary>
     /// Spawn a single bullet using provided transform as a director.
     /// </summary>
-    public void SpawnBullet(Transform director)
-    {
-        // Place the position using the director as a reference.
-        var bulletPosition = director.position;
-        var bulletRotation = Quaternion.Euler(director.eulerAngles);
+    
+    //public void SpawnBullet(Transform director)
+    //{
+    //    // Place the position using the director as a reference.
+    //    var bulletPosition = director.position;
+    //    var bulletRotation = Quaternion.Euler(director.eulerAngles);
         
-        // Offset the bullet's position.
-        bulletPosition += (bulletRotation * Vector3.forward) * spawnOffset;
+    //    // Offset the bullet's position.
+    //    bulletPosition += (bulletRotation * Vector3.forward) * spawnOffset;
         
-        // Spawn the bullet.
-        SpawnBullet(bulletPosition, bulletRotation);
-    }
+    //    // Spawn the bullet.
+    //    DoSpawnBullet(bulletPosition, bulletRotation);
+    //}
     
     /// <summary>
     /// Spawn a single bullet using provided transform as a director.
@@ -231,13 +254,13 @@ public class Gun : MonoBehaviour
         if (mUseECS)
         { // Using ECS -> Spawn new entity.
             var bullet = mEntityManager.Instantiate(mBulletEntityPrefab);
-            mEntityManager.SetComponentData(bullet, new LocalTransform{ Position = position, Rotation = rotation });
+            mEntityManager.SetComponentData(bullet, new LocalTransform { Position = position, Rotation = rotation });
         }
         else
         { // Using default -> Spawn new GameObject.
             // Instantiate the bullet and set it up.
             var bullet = Instantiate(bulletPrefab);
-            bullet.transform.position = position;
+            bullet.transform.position = position + (transform.up * spawnOffset);
             bullet.transform.rotation = rotation * Quaternion.Euler(-90.0f, 0.0f, 0.0f);
         }
     }
